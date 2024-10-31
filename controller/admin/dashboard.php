@@ -54,7 +54,7 @@ class Hiring_DetailsController
             $admin[] = $row;
         }
 
-        $response = ['success' => true, 'admin' => $admin];
+        $response = ['success' => true, 'details' => $admin];
         echo json_encode($response);
     }
 

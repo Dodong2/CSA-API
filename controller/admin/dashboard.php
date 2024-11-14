@@ -14,16 +14,17 @@ class Hiring_DetailsController
         $contact_number = $_POST['contact_number'] ?? '';
         $slots = $_POST['slots'] ?? '';
         $locations = $_POST['locations'] ?? '';
+        $collar = $_POST['collar'] ?? '';
 
         //validate input
-        if (empty($business_name) || empty($descriptions) || empty($work_positions) || empty($company_email) || empty($contact_number) || empty($slots) || empty($locations)) {
+        if (empty($business_name) || empty($descriptions) || empty($work_positions) || empty($company_email) || empty($contact_number) || empty($slots) || empty($locations) || empty($collar)) {
             $response = ['success' => false, 'message' => 'All fields are required.'];
             echo json_encode($response);
             return;
         }
 
         //Insert data sa database
-        $stmt = $conn->prepare('INSERT INTO admin (business_name, descriptions, work_positions, company_email, contact_number, slots, locations) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        $stmt = $conn->prepare('INSERT INTO admin (business_name, descriptions, work_positions, company_email, contact_number, slots, locations, collar) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
         //check yung preparation statement kung successful
         if ($stmt === false) {
             $response = ['success' => false, 'message' => 'SQL prepare error: ' . $conn->error];
@@ -32,7 +33,7 @@ class Hiring_DetailsController
         }
 
         //Bind parameters
-        $stmt->bind_param('sssssss', $business_name, $descriptions, $work_positions, $company_email, $contact_number, $slots, $locations);
+        $stmt->bind_param('ssssssss', $business_name, $descriptions, $work_positions, $company_email, $contact_number, $slots, $locations, $collar);
         if ($stmt->execute()) {
             $response = ['success' => true, 'message' => 'Hiring Details created successfully'];
         } else {
@@ -70,16 +71,17 @@ class Hiring_DetailsController
         $contact_number = $_POST['contact_number'] ?? '';
         $slots = $_POST['slots'] ?? '';
         $locations = $_POST['locations'] ?? '';
+        $collar = $_POST['collar'] ?? '';
 
         //Validate input
-        if (empty($id) || empty($business_name) || empty($descriptions) || empty($work_positions) || empty($company_email) || empty($contact_number) || empty($slots) || empty($locations)) {
+        if (empty($id) || empty($business_name) || empty($descriptions) || empty($work_positions) || empty($company_email) || empty($contact_number) || empty($slots) || empty($locations) || empty($collar)) {
             $response = ['success' => false, 'message' => 'All fields are required.'];
             echo json_encode($response);
             return;
         }
 
         //update data in the database
-        $stmt = $conn->prepare('UPDATE admin SET business_name = ?, descriptions = ?, work_positions = ?, company_email = ?, contact_number = ?, slots = ?, locations = ? WHERE id = ?');
+        $stmt = $conn->prepare('UPDATE admin SET business_name = ?, descriptions = ?, work_positions = ?, company_email = ?, contact_number = ?, slots = ?, locations = ?, collar =? WHERE id = ?');
         if ($stmt === false) {
             $response = ['success' => false, 'message' => 'SQL prepare error' . $conn->error];
             echo json_encode($response);
@@ -87,7 +89,7 @@ class Hiring_DetailsController
         }
 
         //Bind Parameters para sa security and interaction sa database
-        $stmt->bind_param('sssssssi', $business_name, $descriptions, $work_positions, $company_email, $contact_number, $slots, $locations);
+        $stmt->bind_param('ssssssssi', $business_name, $descriptions, $work_positions, $company_email, $contact_number, $slots, $locations, $collar, $id);
         if($stmt->execute()) {
             $response = ['success' => true, 'message' => 'Details updated successfully'];
         } else {

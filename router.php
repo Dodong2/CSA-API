@@ -29,6 +29,9 @@ switch($action) {
     case 'delete':
         $Hiring_DetailesController->delete_details();
         break;
+    case 'pink_collars':
+        $Hiring_DetailesController->get_pink();
+        break;
     default: 
     echo json_encode(['success' => false, 'message' => 'Invalid Action']);
     break;

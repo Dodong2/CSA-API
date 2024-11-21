@@ -124,6 +124,21 @@ class Hiring_DetailsController
         echo json_encode($response);
     }
 
+    public function get_pink() {
+        global $conn;
+        $result = $conn->query("SELECT COUNT(*) as pink_collar FROM admin WHERE collar = 'pink collar'");
+
+        $row = $result->fetch_assoc();
+        
+        if ($row) {
+            $response = ['success' => 'true', 'details' => $row['pink_collar']];
+        } else {
+            $response = ['success' => 'false', 'message' => 'No data found.'];
+        }
+        echo json_encode($response);
+    }
+
 }
+
 
 ?>

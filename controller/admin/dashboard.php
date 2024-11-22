@@ -124,6 +124,10 @@ class Hiring_DetailsController
         echo json_encode($response);
     }
 
+} 
+
+class Count_CollarsController {
+    //get count collar para alam kung ilang pink collars
     public function get_pink() {
         global $conn;
         $result = $conn->query("SELECT COUNT(*) as pink_collar FROM admin WHERE collar = 'pink collar'");
@@ -131,13 +135,68 @@ class Hiring_DetailsController
         $row = $result->fetch_assoc();
         
         if ($row) {
-            $response = ['success' => 'true', 'details' => $row['pink_collar']];
+            $response = ['success' => 'true', 'pink_collar' => $row['pink_collar']];
         } else {
             $response = ['success' => 'false', 'message' => 'No data found.'];
         }
         echo json_encode($response);
     }
 
+    //get count collar para alam kung ilang green collars
+    public function get_green() {
+        global $conn;
+        $result = $conn->query("SELECT COUNT(*) as green_collar FROM admin WHERE collar = 'green collar'");
+        $row = $result->fetch_assoc();
+
+        if($row) {
+            $response = ['success' => 'true', 'green_collar' => $row['green_collar']];
+        } else {
+            $response = ['success' => 'false', 'message' => 'No data found.'];
+        }
+        echo json_encode(($response));
+    }
+
+    //get count collar para alam kung ilang white collars
+    public function get_white() {
+        global $conn;
+        $result = $conn->query("SELECT COUNT(*) as white_collar FROM admin WHERE collar = 'white collar'");
+        $row = $result->fetch_assoc();
+
+        if($row) {
+            $response = ['success' => 'true', 'white_collar' => $row['white_collar']];
+        } else {
+            $response = ['success' => 'false', 'message' => 'No data found.'];
+        }
+        echo json_encode(($response));
+    }
+
+    //get count collar para alam kung ilang blue collars
+    public function get_blue() {
+        global $conn;
+        $result = $conn->query("SELECT COUNT(*) as blue_collar FROM admin WHERE collar = 'blue collar'");
+        $row = $result->fetch_assoc();
+    
+        if($row) {
+            $response = ['success' => 'true', 'blue_collar' => $row['blue_collar']];
+        } else {
+            $response = ['success' => 'false', 'message' => 'No data found.'];
+        }
+        echo json_encode(($response));
+    }
+
+    //get count collar para alam kung ilang grey collars
+    public function get_grey() {
+        global $conn;
+        $result = $conn->query("SELECT COUNT(*) as grey_collar FROM admin WHERE collar = 'grey collar'");
+        $row = $result->fetch_assoc();
+            
+        if($row) {
+            $response = ['success' => 'true', 'grey_collar' => $row['grey_collar']];
+        } else {
+            $response = ['success' => 'false', 'message' => 'No data found.'];
+        }
+        echo json_encode(($response));
+    }
 }
 
 

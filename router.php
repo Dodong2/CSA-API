@@ -7,6 +7,7 @@ require 'controller/admin/dashboard.php';
 
 $RegLogController = new RegLogController();
 $Hiring_DetailesController = new Hiring_DetailsController();
+$Count_CollarsController = new Count_CollarsController();
 
 $action = $_GET['action'] ?? '';
 
@@ -30,7 +31,19 @@ switch($action) {
         $Hiring_DetailesController->delete_details();
         break;
     case 'pink_collars':
-        $Hiring_DetailesController->get_pink();
+        $Count_CollarsController->get_pink();
+        break;
+    case 'green_collars':
+        $Count_CollarsController->get_green();
+        break;
+    case 'white_collars':
+        $Count_CollarsController->get_white();
+        break;
+    case 'blue_collars':
+        $Count_CollarsController->get_blue();
+        break;
+    case 'grey_collars':
+        $Count_CollarsController->get_grey();
         break;
     default: 
     echo json_encode(['success' => false, 'message' => 'Invalid Action']);

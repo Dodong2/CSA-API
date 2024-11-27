@@ -1,101 +1,168 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-//Step 1
-class RegLogController
-{
+require 'vendor/autoload.php'; // Composer autoload for PHPMailer
 
-    public function register() 
-    {
+class RegLogController {
+    private $conn;
+    private $mail;
 
+    public function __construct() {
         global $conn;
+        $this->conn = $conn;
+        $this->mail = new PHPMailer(true);
+    }
 
-        //register function
-        $username = $_POST['username'] ?? '';
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
-        $profession = $_POST['profession'] ?? '';
+    // Generate 4-digit OTP
+    private function generateOTP() {
+        return str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+    }
 
-        $response = [];
+    // Send OTP via Gmail
+    private function sendOTPEmail($email, $otp) {
+        try {
+            // SMTP Configuration (replace with your Gmail SMTP settings)
+            $this->mail->isSMTP();
+            $this->mail->Host = 'smtp.gmail.com';
+            $this->mail->SMTPAuth = true;
+            $this->mail->Username = 'carlseighartaliode@gmail.com';
+            $this->mail->Password = 'npmt uids kaxd zirj'; // Use App Password, not regular password
+            $this->mail->SMTPSecure = 'tls';
+            $this->mail->Port = 587;
 
-        // Validate input
-        if (empty($username) || empty($email) || empty($password) || empty($profession)) {
-            $response = ['success' => false, 'message' => 'Username, email, password ,and profession cannot be empty'];
-            echo json_encode($response);
+            // Email Content
+            $this->mail->setFrom('your_verified_gmail@gmail.com', 'Your Company');
+            $this->mail->addAddress($email);
+            $this->mail->isHTML(true);
+            $this->mail->Subject = 'Your Registration OTP';
+            $this->mail->Body = "Your 4-digit verification code is: <b>$otp</b>";
+
+            $this->mail->send();
+            return true;
+        } catch (Exception $e) {
+            // Log error or handle appropriately
+            return false;
+        }
+    }
+
+    public function register() {
+        $username = $_POST['username'] ?? ''; 
+        $email = $_POST['email'] ?? ''; 
+        $password = $_POST['password'] ?? ''; 
+    
+        if (empty($username) || empty($email) || empty($password)) {
+            echo json_encode(['success' => false, 'message' => 'Username, email, password cannot be empty']);
             return;
         }
-
-        // Check if the email already exists
-        $stmt = $conn->prepare('SELECT * FROM reglog WHERE email =?');
+    
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid email format']);
+            return;
+        }
+    
+        $stmt = $this->conn->prepare('SELECT * FROM reglog WHERE email = ?');
         $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        if ($result->num_rows > 0) {
+            echo json_encode(['success' => false, 'message' => 'Email already exists']);
+            return;
+        }
+    
+        $otp = $this->generateOTP();
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    
+        $stmt = $this->conn->prepare('INSERT INTO temp_registration (username, email, password, otp, created_at) VALUES (?, ?, ?, ?, NOW())');
+        $stmt->bind_param('ssss', $username, $email, $hashedPassword, $otp);
+    
+        if ($stmt->execute()) {
+            if ($this->sendOTPEmail($email, $otp)) {
+                echo json_encode(['success' => true, 'message' => 'OTP sent to your email', 'email' => $email]);
+            } else {
+                $this->conn->query("DELETE FROM temp_registration WHERE email = ?", $email);
+                echo json_encode(['success' => false, 'message' => 'Failed to send OTP']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to register: ' . $stmt->error]);
+        }
+    }
+
+    public function verifyRegistration() {
+        $email = $_POST['email'] ?? '';
+        $otp = $_POST['otp'] ?? '';
+
+        // Verify OTP
+        $stmt = $this->conn->prepare('SELECT * FROM temp_registration WHERE email = ? AND otp = ? AND created_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE)');
+        $stmt->bind_param('ss', $email, $otp);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            $response = ['success' => false, 'message' => 'Email already exists'];
-            echo json_encode($response);
-            return;
-        }
+            // OTP is valid, get registration details
+            $row = $result->fetch_assoc();
 
-        // Insert into Database
-        $stmt = $conn->prepare('INSERT INTO reglog (username, email, password, profession) VALUES (?, ?, ?, ?)');
-        if ($stmt === false) {
-            $response = ['success' => false, 'message' => 'SQL prepare error: ' . $conn->error];
-            echo json_encode($response);
-            return;
-        }
+            // Insert into main registration table
+            $stmt = $this->conn->prepare('INSERT INTO reglog (username, email, password) VALUES (?, ?, ?)');
+            $stmt->bind_param('sss', $row['username'], $row['email'], $row['password']);
+            
+            if ($stmt->execute()) {
+                // Remove temp registration entry
+                $stmt = $this->conn->prepare('DELETE FROM temp_registration WHERE email = ?');
+                $stmt->bind_param('s', $email);
+                $stmt->execute();
 
-        $stmt->bind_param('ssss', $username, $email, $password, $profession);
-
-        if ($stmt->execute()) {
-            $response = ['success' => true, 'message' => 'User registered successfully'];
+                echo json_encode([
+                    'success' => true, 
+                    'message' => 'Registration completed successfully'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'Failed to complete registration'
+                ]);
+            }
         } else {
-            $response = ['success' => false, 'message' => 'Failed to register user: ' . $stmt->error];
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Invalid or expired OTP'
+            ]);
         }
-
-        $stmt->close();
-        echo json_encode($response);
     }
 
-    // User login function
-    public function login()
-    {
-        global $conn;
-
-        // Sanitize input
-        $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-        $password = htmlspecialchars(trim($_POST['password'] ?? ''));
-
-        $response = [];
-
-        // Validate input
+    public function login() {
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+    
+        // Validate inputs
         if (empty($email) || empty($password)) {
-            $response = ['success' => false, 'message' => 'Email and password cannot be empty'];
-            echo json_encode($response);
+            echo json_encode(['success' => false, 'message' => 'Email and password cannot be empty']);
             return;
         }
-
+    
         // Check if the email exists
-        $stmt = $conn->prepare('SELECT * FROM reglog WHERE email = ?');
+        $stmt = $this->conn->prepare('SELECT password FROM reglog WHERE email = ?');
         $stmt->bind_param('s', $email);
         $stmt->execute();
         $result = $stmt->get_result();
-
-        if ($result->num_rows === 0) {
-            $response = ['success' => false, 'message' => 'Invalid email or password'];
-            echo json_encode($response);
-            return;
-        }
-
-        $user = $result->fetch_assoc();
-
-        // Compare the password directly (since we're not hashing)
-        if ($password === $user['password']) {
-            $response = ['success' => true, 'message' => 'Login successful'];
+    
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $hashedPassword = $row['password'];
+    
+            // Verify the password
+            if (password_verify($password, $hashedPassword)) {
+                echo json_encode(['success' => true, 'message' => 'Login successful']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
+            }
         } else {
-            $response = ['success' => false, 'message' => 'Invalid email or password'];
+            echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
         }
-
-        echo json_encode($response);
+    
+        $stmt->close();
     }
+    
 }
 ?>

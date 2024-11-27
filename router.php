@@ -15,6 +15,9 @@ switch($action) {
     case 'register':
         $RegLogController->register();
         break;
+    case 'verify':
+        $RegLogController->verifyRegistration();
+        break;
     case 'login':
         $RegLogController->login();
         break;

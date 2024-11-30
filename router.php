@@ -1,17 +1,22 @@
 <?php
-
 require 'config.php';
 require 'controller/user/reglog.php';
 require 'controller/admin/dashboard.php';
+require 'controller/user/employer.php';
+require 'controller/admin/admin.php';
 
 
 $RegLogController = new RegLogController();
 $Hiring_DetailesController = new Hiring_DetailsController();
 $Count_CollarsController = new Count_CollarsController();
+$EmployerJobPostController = new EmployerJobPostController();
+$AdminJobPostController = new AdminJobPostController();
+
 
 $action = $_GET['action'] ?? '';
 
 switch($action) {
+    // user and employer
     case 'register':
         $RegLogController->register();
         break;
@@ -21,6 +26,38 @@ switch($action) {
     case 'login':
         $RegLogController->login();
         break;
+    case 'logout':
+        $RegLogController->logout();
+        break;
+    case 'create_post_employer':
+        $EmployerJobPostController->create_job_post();
+        break;
+    case 'get_employer_post':
+        $EmployerJobPostController->get_employer_job_posts();
+        break;
+    case 'update_job_post':
+        $EmployerJobPostController->update_job_post();
+        break;
+    case 'delete_job_post':
+        $EmployerJobPostController->delete_job_post();
+        break;
+    case 'get_approved_employer_posts':
+        $EmployerJobPostController->get_approved_employer_job_posts();
+        break;
+    //Admin
+    case 'get_pending':
+        $AdminJobPostController->get_pending_job_posts();
+        break;
+    case 'approve_job':
+        $AdminJobPostController->approve_job_post();
+        break;
+    case 'reject_job':
+        $AdminJobPostController->reject_job_post();
+        break;
+    case 'get_approve':
+        $AdminJobPostController->get_approved_job_posts();
+        break;
+    // other admin task
     case 'insert':
         $Hiring_DetailesController->hiring_details();
         break;

@@ -32,11 +32,11 @@ class RegLogController {
             $this->mail->Port = 587;
 
             // Email Content
-            $this->mail->setFrom('your_verified_gmail@gmail.com', 'Your Company');
+            $this->mail->setFrom('your_verified_gmail@gmail.com', 'Career Seach Agency');
             $this->mail->addAddress($email);
             $this->mail->isHTML(true);
             $this->mail->Subject = 'Your Registration OTP';
-            $this->mail->Body = "Your 4-digit verification code is: <b>$otp</b>";
+            $this->mail->Body = "Your 4-digit verification code is: <b>$otp</b> note: his OTP is confidential and valid for the next [time limit, e.g., 10 minutes].";
 
             $this->mail->send();
             return true;
@@ -131,6 +131,7 @@ class RegLogController {
         }
     }
 
+
     public function login() {
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
@@ -142,7 +143,7 @@ class RegLogController {
         }
     
         // Check if the email exists
-        $stmt = $this->conn->prepare('SELECT password FROM reglog WHERE email = ?');
+        $stmt = $this->conn->prepare('SELECT id, password, email FROM reglog WHERE email = ?');
         $stmt->bind_param('s', $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -153,8 +154,17 @@ class RegLogController {
     
             // Verify the password
             if (password_verify($password, $hashedPassword)) {
-                echo json_encode(['success' => true, 'message' => 'Login successful']);
-            } else {
+                // Store user information in session
+                session_start();
+                $_SESSION['user_id'] = $row['id'];
+                $_SESSION['email'] = $row['email'];
+
+                echo json_encode([
+                    'success' => true, 
+                    'message' => 'Login successful', 
+                    'user_id' => $row['id']
+                ]);
+            }  else {
                 echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
             }
         } else {
@@ -162,6 +172,12 @@ class RegLogController {
         }
     
         $stmt->close();
+    }
+
+    public function logout() {
+        session_start();
+        session_destroy();
+        echo json_encode(['success' => true, 'message' => 'Logged out successfully']);
     }
     
 }

@@ -7,6 +7,7 @@ class EmployerJobPostController {
         $this->conn = $conn;
     }
 
+    //insert ng imployer
     public function create_job_post() {
         // Start session to access user_id
         session_start();
@@ -71,7 +72,7 @@ class EmployerJobPostController {
         }
         $stmt->close();
     }
-
+    //get ng post details ng employer
     public function get_employer_job_posts() {
         // Start session to access user_id
         session_start();
@@ -105,7 +106,7 @@ class EmployerJobPostController {
         ]);
         $stmt->close();
     }
-
+    //update ng job ng employer
     public function update_job_post() {
         // Start session to access user_id
         session_start();
@@ -177,7 +178,7 @@ class EmployerJobPostController {
         }
         $stmt->close();
     }
-
+    //delete job post ng employer
     public function delete_job_post() {
         // Start session to access user_id
         session_start();
@@ -214,8 +215,8 @@ class EmployerJobPostController {
         $stmt->close();
     }
 
-// In admin.php or employer.php
-public function get_approved_employer_job_posts() {
+    // get yung mga n approved ng employer In admin.php or employer.php
+    public function get_approved_employer_job_posts() {
     session_start();
 
     // Check if user is logged in
@@ -247,7 +248,25 @@ public function get_approved_employer_job_posts() {
     ]);
 
     $stmt->close();
-}
+    }
+
+    //get yung mga job na naka post para sa joblist
+    public function get_joblist() {
+        global $conn;
+
+        $result = $conn->query('SELECT * FROM employer_job_posts');
+        $joblist = [];
+
+        while($row = $result->fetch_assoc()) {
+            $joblist[] = $row;
+        }
+
+        $response = ['success' => true, 'joblists' => $joblist];
+        echo json_encode($response);
+    }
+
+
+
 
 }
 ?>

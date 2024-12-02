@@ -44,6 +44,9 @@ switch($action) {
     case 'get_approved_employer_posts':
         $EmployerJobPostController->get_approved_employer_job_posts();
         break;
+    case 'joblist':
+        $EmployerJobPostController->get_joblist();
+        break;
     //Admin
     case 'get_pending':
         $AdminJobPostController->get_pending_job_posts();

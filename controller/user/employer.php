@@ -193,7 +193,7 @@ class EmployerJobPostController {
         }
 
         $user_id = $_SESSION['user_id'];
-        $post_id = $_POST['post_id'] ?? '';
+        $post_id = $_POST['id'] ?? '';
 
         // Prepare delete SQL statement
         $stmt = $this->conn->prepare("DELETE FROM employer_job_posts 
@@ -216,7 +216,7 @@ class EmployerJobPostController {
     }
 
     // get yung mga n approved ng employer In admin.php or employer.php
-    public function get_approved_employer_job_posts() {
+public function get_approved_employer_job_posts() {
     session_start();
 
     // Check if user is logged in

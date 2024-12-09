@@ -35,9 +35,6 @@ switch($action) {
     case 'get_employer_post':
         $EmployerJobPostController->get_employer_job_posts();
         break;
-    case 'update_job_post':
-        $EmployerJobPostController->update_job_post();
-        break;
     case 'delete_job_post':
         $EmployerJobPostController->delete_job_post();
         break;
@@ -60,6 +57,24 @@ switch($action) {
     case 'get_approve':
         $AdminJobPostController->get_approved_job_posts();
         break;
+    case 'get_approve_collar':
+        $AdminJobPostController->get_approved_collar();
+        break;
+    case 'get_approve_reject':
+        $AdminJobPostController->get_post_percentages();
+        break;
+    case 'delete_detail':
+        $AdminJobPostController-> admin_delete_details();
+        break;
+    case 'update_job':
+        $AdminJobPostController->update_job_post();
+        break;
+    case 'update_list':
+        $AdminJobPostController->get_job_post_details();
+        break;
+    case 'get_reject':
+        $AdminJobPostController->get_reject();
+        break;
     // other admin task
     case 'insert':
         $Hiring_DetailesController->hiring_details();
@@ -70,9 +85,7 @@ switch($action) {
     case 'update':
         $Hiring_DetailesController->update_details();
         break;
-    case 'delete':
-        $Hiring_DetailesController->delete_details();
-        break;
+    
     case 'pink_collars':
         $Count_CollarsController->get_pink();
         break;

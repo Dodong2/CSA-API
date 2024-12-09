@@ -26,8 +26,8 @@ class RegLogController {
             $this->mail->isSMTP();
             $this->mail->Host = 'smtp.gmail.com';
             $this->mail->SMTPAuth = true;
-            $this->mail->Username = 'carlseighartaliode@gmail.com';
-            $this->mail->Password = 'npmt uids kaxd zirj'; // Use App Password, not regular password
+            $this->mail->Username = 'careersearchagency@gmail.com';
+            $this->mail->Password = 'asae gozf kbdj mvfz'; // Use App Password, not regular password
             $this->mail->SMTPSecure = 'tls';
             $this->mail->Port = 587;
 

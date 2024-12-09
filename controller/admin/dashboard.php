@@ -123,7 +123,6 @@ class Hiring_DetailsController
         $stmt->close();
         echo json_encode($response);
     }
-
 } 
 
 class Count_CollarsController {

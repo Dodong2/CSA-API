@@ -2,3 +2,9 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.php [L]
+
+# Enable directory listing for images and set content type
+Options +Indexes
+<FilesMatch "\.(jpg|jpeg|png|gif|bmp|webp|svg)$">
+  Header set Content-Type "image/jpeg"
+</FilesMatch>

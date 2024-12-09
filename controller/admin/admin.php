@@ -48,27 +48,45 @@ class AdminJobPostController {
     }
 
     // Reject job post
-    public function reject_job_post() {
-        // Add admin authentication check here
-        $post_id = $_POST['id'] ?? '';
-        $reason = $_POST['reason'] ?? 'Not specified';
+// Reject job post
+public function reject_job_post() {
+    // Add admin authentication check here
 
-        $stmt = $this->conn->prepare('UPDATE employer_job_posts SET status = "rejected", rejection_reason = ? WHERE id = ? AND status = "pending"');
-        $stmt->bind_param('si', $reason, $post_id);
-        
-        if ($stmt->execute()) {
-            echo json_encode([
-                'success' => true, 
-                'message' => 'Job post rejected successfully'
-            ]);
-        } else {
-            echo json_encode([
-                'success' => false, 
-                'message' => 'Failed to reject job post: ' . $stmt->error
-            ]);
-        }
-        $stmt->close();
+    $post_id = $_POST['id'] ?? '';
+    $reason = $_POST['reason'] ?? 'Not specified';
+
+    // Example: Validate reason if needed
+    $allowed_reasons = [
+        'Business permit and valid ID are not accepted, please try again',
+        'Incomplete requirements',
+        'Duplicate job post'
+    ];
+
+    if (!in_array($reason, $allowed_reasons)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid rejection reason provided.'
+        ]);
+        return;
     }
+
+    $stmt = $this->conn->prepare('UPDATE employer_job_posts SET status = "rejected", rejection_reason = ? WHERE id = ? AND status = "pending"');
+    $stmt->bind_param('si', $reason, $post_id);
+
+    if ($stmt->execute()) {
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Job post rejected successfully'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Failed to reject job post: ' . $stmt->error
+        ]);
+    }
+    $stmt->close();
+}
+
 
     // Get approved public job posts
     public function get_approved_job_posts() {
@@ -131,6 +149,26 @@ echo json_encode([
 ]);
 }
 
+public function get_employment_type() {
+    $stmt = $this->conn->prepare('
+        SELECT employment_type, COUNT(*) AS count 
+        FROM employer_job_posts 
+        GROUP BY employment_type
+    ');
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $counts = [];
+    while ($row = $result->fetch_assoc()) {
+        $counts[$row['employment_type']] = (int) $row['count'];
+    }
+
+    echo json_encode([
+        'success' => true, 
+        'counts' => $counts
+    ]);
+}
+
 
 //Delete function na syempre dedelete yung mga existing data
 public function admin_delete_details() {
@@ -155,7 +193,6 @@ public function admin_delete_details() {
         $stmt->close();
         echo json_encode($response);
     }
-
 
     public function update_job_post() {
         global $conn;
@@ -222,7 +259,7 @@ public function admin_delete_details() {
     
 
         //para lang sa mga rejected na job lists
-        public function get_reject() {
+    public function get_reject() {
             global $conn;
     
             $result = $conn->query("SELECT * FROM employer_job_posts WHERE status = 'rejected'");
@@ -270,7 +307,30 @@ public function admin_delete_details() {
             $stmt->close();
         }
 
-}
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    }
+
+
 
 
 

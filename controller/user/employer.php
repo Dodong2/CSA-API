@@ -7,73 +7,6 @@ class EmployerJobPostController {
         $this->conn = $conn;
     }
 
-    //insert ng imployer
-    // public function create_job_post() {
-    //     // Start session to access user_id
-    //     session_start();
-        
-    //     // Check if user is logged in
-    //     if (!isset($_SESSION['user_id'])) {
-    //         echo json_encode([
-    //             'success' => false, 
-    //             'message' => 'User not logged in'
-    //         ]);
-    //         return;
-    //     }
-
-    //     // Get user_id from session
-    //     $user_id = $_SESSION['user_id'];
-
-    //     // Collect job post data
-    //     $business_name = $_POST['business_name'] ?? '';
-    //     $descriptions = $_POST['descriptions'] ?? '';
-    //     $work_schedule = $_POST['work_schedule'] ?? '';
-    //     $skills_required = $_POST['skills_required'] ?? '';
-    //     $experience = $_POST['experience'] ?? '';
-    //     $employment_type = $_POST['employment_type'] ?? '';
-    //     $work_positions = $_POST['work_positions'] ?? '';
-    //     $company_email = $_POST['company_email'] ?? '';
-    //     $contact_number = $_POST['contact_number'] ?? '';
-    //     $locations = $_POST['locations'] ?? '';
-    //     $collar = $_POST['collar'] ?? '';
-
-    //     // Validate required fields
-    //     if (empty($business_name) || empty($descriptions) || empty($work_positions)) {
-    //         echo json_encode([
-    //             'success' => false, 
-    //             'message' => 'Missing required fields'
-    //         ]);
-    //         return;
-    //     }
-
-    //     // Prepare SQL statement
-    //     $stmt = $this->conn->prepare("INSERT INTO employer_job_posts 
-    //         (user_id, business_name, descriptions, work_schedule, skills_required, 
-    //         experience, employment_type, work_positions, company_email, 
-    //         contact_number, locations, collar) 
-    //         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        
-    //     $stmt->bind_param("isssssssssss", 
-    //         $user_id, $business_name, $descriptions, $work_schedule, 
-    //         $skills_required, $experience, $employment_type, $work_positions, 
-    //         $company_email, $contact_number, $locations, $collar);
-
-    //     if ($stmt->execute()) {
-    //         echo json_encode([
-    //             'success' => true, 
-    //             'message' => 'Job post submitted successfully. Pending admin approval.',
-    //             'post_id' => $stmt->insert_id
-    //         ]);
-    //     } else {
-    //         echo json_encode([
-    //             'success' => false, 
-    //             'message' => 'Failed to submit job post: ' . $stmt->error
-    //         ]);
-    //     }
-    //     $stmt->close();
-    // }
-
-
     public function create_job_post() {
         session_start();
     
@@ -149,8 +82,6 @@ class EmployerJobPostController {
         $stmt->close();
     }
     
-
-    
     //get ng post details ng employer
     public function get_employer_job_posts() {
         // Start session to access user_id
@@ -223,7 +154,7 @@ class EmployerJobPostController {
         $stmt->close();
     }
 
-    // get yung mga n approved ng employer In admin.php or employer.php
+    // get yung mga n approved ng employer In admin.php or employer.php napunta sa admin
     public function get_approved_employer_job_posts() {
         session_start();
     
@@ -268,6 +199,40 @@ class EmployerJobPostController {
 
         $response = ['success' => true, 'joblists' => $joblist];
         echo json_encode($response);
+    }
+
+    public function get_user_approved_job_posts() {
+        session_start();
+    
+        // Check if user is logged in
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'User not logged in'
+            ]);
+            return;
+        }
+    
+        // Get the current logged-in user's ID
+        $current_user_id = $_SESSION['user_id'];
+    
+        // Fetch approved job posts ONLY for the currently logged-in user
+        $stmt = $this->conn->prepare("SELECT * FROM employer_job_posts WHERE user_id = ? AND status = 'approved' ORDER BY created_at DESC");
+        $stmt->bind_param("i", $current_user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        $job_posts = [];
+        while ($row = $result->fetch_assoc()) {
+            $job_posts[] = $row;
+        }
+    
+        echo json_encode([
+            'success' => true, 
+            'joblists' => $job_posts
+        ]);
+    
+        $stmt->close();
     }
 
 

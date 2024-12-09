@@ -44,6 +44,9 @@ switch($action) {
     case 'joblist':
         $EmployerJobPostController->get_joblist();
         break;
+    case 'user_approved_joblist':
+        $EmployerJobPostController->get_user_approved_job_posts();
+        break;
     //Admin
     case 'get_pending':
         $AdminJobPostController->get_pending_job_posts();
@@ -74,6 +77,9 @@ switch($action) {
         break;
     case 'get_reject':
         $AdminJobPostController->get_reject();
+        break;
+    case 'get_employment_type': 
+        $AdminJobPostController->get_employment_type() ;
         break;
     // other admin task
     case 'insert':

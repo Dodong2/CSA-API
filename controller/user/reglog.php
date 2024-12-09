@@ -133,18 +133,18 @@ class RegLogController {
 
 
     public function login() {
-        $email = $_POST['email'] ?? '';
+        $input = $_POST['input'] ?? '';
         $password = $_POST['password'] ?? '';
     
         // Validate inputs
-        if (empty($email) || empty($password)) {
+        if (empty($input) || empty($password)) {
             echo json_encode(['success' => false, 'message' => 'Email and password cannot be empty']);
             return;
         }
     
         // Check if the email exists
-        $stmt = $this->conn->prepare('SELECT id, password, email FROM reglog WHERE email = ?');
-        $stmt->bind_param('s', $email);
+        $stmt = $this->conn->prepare('SELECT id, password, email, username FROM reglog WHERE email = ? OR username = ?');
+        $stmt->bind_param('ss', $input, $input);
         $stmt->execute();
         $result = $stmt->get_result();
     
@@ -158,6 +158,7 @@ class RegLogController {
                 session_start();
                 $_SESSION['user_id'] = $row['id'];
                 $_SESSION['email'] = $row['email'];
+                $_SESSION['username'] = $row['username'];
 
                 echo json_encode([
                     'success' => true, 
@@ -165,10 +166,10 @@ class RegLogController {
                     'user_id' => $row['id']
                 ]);
             }  else {
-                echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
+                echo json_encode(['success' => false, 'message' => 'Invalid username/email or password']);
             }
         } else {
-            echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
+            echo json_encode(['success' => false, 'message' => 'Invalid username/email or password']);
         }
     
         $stmt->close();
